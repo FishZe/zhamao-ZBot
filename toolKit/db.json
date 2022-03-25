@@ -1,0 +1,9 @@
+{
+    "host": "", 
+    "port": , 
+    "user": "", 
+    "password": "", 
+    "db": "", 
+    "use_unicode": true, 
+    "charset": "utf8"
+}
