@@ -14,15 +14,7 @@ use ZM\Annotation\Swoole\OnTick;
  * @since 2.0
  */
 class Push{
-    
-    /**
-     * @CQCommand("test1")
-     */
-    public function test(){
-        $api = new Api;
-        $api -> startDanmu(48743);
-    }
-     
+
     /**
      * 格式化时间
      * Arg: $t(int) -> 间隔时间
@@ -48,14 +40,18 @@ class Push{
      * data: 2022/03/15 23:23
      */
     public function pushMsg($mid, $msg, $msgType = -1, $at = false, $type = "all"){
-        if(!in_array($type, array("all", "private", "group"))){return false;}
+        if(!in_array($type, array("all", "private", "group"))){
+            return false;
+        }
         $msgType =  $msgType >= (1 << 10) ? (1 <<10) : $msgType;
         $sql = new Sql;
         $pushList = $sql -> getUpPushByType($mid, $type);
         foreach ($pushList as $i){
             if(($msgType == -2 && $i['danmu']) || ($msgType == -1 && $i['live_push']) || ($msgType >= 0 && ($msgType & $i['dynamic_type']))){
                 $bot = OneBotV11::get($i['bot_id']);
-                if($i['qq_type'] == 'private') {$bot -> sendPrivateMsg($i['qq_id'], $msg);}
+                if($i['qq_type'] == 'private') {
+                    $bot -> sendPrivateMsg($i['qq_id'], $msg);
+                }
                 else if($i['qq_type'] == 'group') {
                     $sendMsg = $at ? CQ::at("all").$msg : $msg;
                     $bot -> sendGroupMsg($i['qq_id'], $sendMsg);
@@ -74,29 +70,40 @@ class Push{
         $upMids = $sql -> getAllUpsMids();
         $upInfo = $sql -> getAllUpsByMid();
         $liveStatus = $api ->  getLiveRoomsStatus($upMids);
-        if($liveStatus == NULL){return;}
-
+        if($liveStatus == NULL){
+            return;
+        }
+        
         foreach($upMids as $up){
+            
+            if(!in_array($up, array_keys($liveStatus))){
+                continue;
+            }
             $state = $liveStatus[$up];
             $info = $upInfo[$up];
 
             if($state['live_status'] == 1 && !$info['live_status']){
-                $sql -> startLive($up);
                 $liveInterval = $sql -> getLiveStopInterval($up);
-                if($info['danmu_record']){ $api -> startDanmu($info['room_id']); }
-                $msg = "{$info['name']}直播了！\n 【{$state['title']}】\n".CQ::image($state['cover_from_user'])."\nhttps://live.bilibili.com/".$state['room_id']."\n"."距离上次直播: ".$this -> getFormatTime($liveInterval);
+                $sql -> startLive($up);
+                if($info['danmu_record']){ 
+                    $api -> startDanmu($info['room_id']); 
+                }
+                $msg = "{$info['name']}直播了！\n 【{$state['title']}】\n".CQ::image($state['cover_from_user'])."\n传送门 →https://live.bilibili.com/".$state['room_id']."\n"."距离上次直播: ".$this -> getFormatTime($liveInterval)."\n<==================> \n ZBot V0.0.1";
                 $this -> pushMsg($up, $msg, -1);
                 
             } else if($state['live_status'] != 1 && $info['live_status']){
                 $sql -> stopLive($up);
                 $liveInterval = $sql -> getLiveStartInterval($up);
-                $msg = "{$info['name']}直播结束了！\n 【{$state['title']}】\n".CQ::image($state['cover_from_user'])."直播时长: ".$this -> getFormatTime($liveInterval);
+                $msg = "{$info['name']}直播结束了！\n 【{$state['title']}】\n".CQ::image($state['cover_from_user'])."直播时长: ".$this -> getFormatTime($liveInterval)."\n<==================> \n ZBot V0.0.1";;
                 $this -> pushMsg($up, $msg, -1);
                 if($info['danmu_record']){
                     $api -> delDanmu($info['room_id']);
                     $live = $sql -> getUpLiveHistoryTop($up);
                     $msg = $api -> getWordCloud($info['room_id'], $live['start_timestamp'], $live['stop_timestamp']);
                     $this -> pushMsg($up, "弹幕词云".$msg, -2);
+                    zm_sleep(10);
+                    $msg = $api -> getDanmuPic($info['room_id'], $live['start_timestamp'], $live['stop_timestamp']);
+                    $this -> pushMsg($up, "弹幕峰值图".$msg, -2);
                 }
             }
         }
@@ -112,11 +119,18 @@ class Push{
         $config = new Config;
         $nowCheck = LightCache::get("nowDynamicCheck");
         $mids = $sql -> getAllUpsMids();
-        if(count($mids) == 0){return;}
-        if($nowCheck >= count($mids)) {$nowCheck = 0;}
+        if(count($mids) == 0){
+            return;
+        }
+        if($nowCheck >= count($mids)) {
+            $nowCheck = 0;
+        }
         $mid = $mids[$nowCheck];
         $upInfo = $sql -> getUp($mid);
         $dynamicList = $api -> getDynamic($mid);
+        if($dynamicList == NULL) {
+            return;
+        }
         for($i = count($dynamicList) - 1; $i >= 0; $i --){
             $dynamic = $dynamicList[$i];
             if($dynamic['desc']['timestamp'] > $upInfo['dynamic_check_timestamp']){
@@ -124,7 +138,7 @@ class Push{
                 $type = $dynamic['desc']['type'];
                 $name = $dynamic['desc']['user_profile']['info']['uname'];
                 $pic = $api -> getDynamicPic($id);
-                $msg = $name." ".$config -> dynamicMap[$type][1]."\nhttps://t.bilibili.com/".$id."\n".$pic;
+                $msg = $name." ".$config -> dynamicMap[$type][1]."\n传送门 → "."https://t.bilibili.com/".$id."\n".$pic."\n<==================> \n ZBot V0.0.1";
                 $sql -> updateUpDynamicTime($mid, $dynamic['desc']['timestamp']);
                 $this -> pushMsg($mid, $msg, $type);
             }

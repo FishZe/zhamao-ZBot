@@ -25,12 +25,16 @@ class Cmd{
     public function addBiliPush($botId, $dynamicType, $livePush, $qqType, $qqId, $mid, $danmuRecord = 0, $name = NULL, $roomId = NULL){
         $sql = new Sql;
         $api = new Api;
-        if(in_array($qqId, $sql -> getUpPushByTypeQQs($mid, $qqType))){return "the subscription has exist!";}
+        if(in_array($qqId, $sql -> getUpPushByTypeQQs($mid, $qqType))){
+            return "the subscription has exist!";
+        }
         $upInfo = array();
         if(!in_array($mid, $sql -> getAllUpsMids($mid))){
             if($name == NULL){
                 $data = $api -> getUpInfo($mid);
-                if($data == NULL){ return "name error!"; }
+                if($data == NULL){ 
+                    return "name error!"; 
+                }
                 $name = $data['name'];
                 $roomId = $data['live_room']['roomid'];
             }
@@ -54,11 +58,21 @@ class Cmd{
         $pushInfo = $sql -> getQQPush($mid, $qqType, $qqId);
         $sql -> cancelPush($mid, $qqType, $qqId);
         $pushList = $sql -> getUpPush($mid);
-        if(count($pushList) == 0){ $sql -> deleteUp($mid); return "cancel successfully!"; }
+        if(count($pushList) == 0){ 
+            $sql -> deleteUp($mid); 
+            return "cancel successfully!"; 
+        }
         if($pushInfo['danmu']){
             $danmuRecord = false;
-            foreach ($pushList as $i){ if($i['danmu']){ $danmuRecord = true; break; }}
-            if(!$danmuRecord){ $sql -> dropDanmuTable(NULL, $mid); }
+            foreach ($pushList as $i){ 
+                if($i['danmu']){ 
+                    $danmuRecord = true; 
+                    break; 
+                }
+            }
+            if(!$danmuRecord){ 
+                $sql -> dropDanmuTable(NULL, $mid); 
+            }
         }
         return "cancel successfully!";
     }
@@ -118,7 +132,9 @@ class Cmd{
         $danmu = in_array("直播", $type) && in_array("直播弹幕", $type) ? 1 : 0;
         $dynamicType = 0;
         foreach (array_keys($config -> dynamicType) as $i){
-            if(in_array($i, $type)){ $dynamicType = $dynamicType | (1 << ($config -> dynamicType[$i] - 1)); }
+            if(in_array($i, $type)){ 
+                $dynamicType = $dynamicType | (1 << ($config -> dynamicType[$i] - 1)); 
+            }
         }
         return $dynamicType.$livePush.$danmu;
     }
@@ -133,15 +149,22 @@ class Cmd{
         $api = new Api;
         $sql = new Sql;
         $config = new Config;
-        if($msg == NULL){ $msg = ctx() -> getMessage(); }
+        if($msg == NULL){ 
+            $msg = ctx() -> getMessage(); 
+        }
         $args = explode(' ', $msg);
-        if(count($args) == 1) { return "lack of args!"; }
+        if(count($args) == 1) { 
+            return "lack of args!"; }
         if($args[1] == '--uid' || $args[1] == '--id'){
-            if(count($args) < 3) { return "lack of args!"; }
+            if(count($args) < 3) { 
+                return "lack of args!"; 
+            }
             $mid = $args[2];
         } else {
             $up = $sql -> getUpByName($args[1]);
-            if($up == NULL) { return 'error name!'; }
+            if($up == NULL) { 
+                return 'error name!'; 
+            }
             $mid = $up['mid'];
         }
         $qqType = $qqType == NULL? ctx() -> getMessageType() : $qqType;
@@ -161,7 +184,9 @@ class Cmd{
         $api = new Api;
         $sql = new Sql;
         $config = new Config;
-        if($msg == NULL){ $msg = ctx() -> getMessage(); }
+        if($msg == NULL){ 
+            $msg = ctx() -> getMessage(); 
+        }
         $offset = 1;
         $args = explode(' ', $msg);
         
@@ -170,13 +195,17 @@ class Cmd{
             $mid = $args[++ $offset];
             $offset ++;
             $data = $api -> getUpInfo($mid);
-            if($data == NULL) { return 'error mid!'; }
+            if($data == NULL) { 
+                return 'error mid!'; 
+            }
             $name = $data['name'];
             $roomId = $data['live_room']['roomid'];
         } else {
             $name = $args[$offset ++];
             $data = $api -> findUserAccurate($name);
-            if($data == NULL) { return 'error name!'; }
+            if($data == NULL) { 
+                return 'error name!'; 
+            }
             $mid = $data['mid'];
             $roomId = $data['room_id'];
         }
@@ -185,7 +214,9 @@ class Cmd{
         if(!($args[$offset] == '--binary' || $args[$offset] == '-b')){
             $types = $this -> parseTypes($args[$offset]);
         } else {
-            if(count($args) < $offset + 2) { return "lack of args!"; }
+            if(count($args) < $offset + 2) {
+                return "lack of args!"; 
+            }
             $types = $args[++ $offset];
         }
         $danmu = $types % 10;

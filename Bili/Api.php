@@ -23,8 +23,25 @@ class Api{
      */
     public function getWordCloud($roomId, $startTime, $endTime){
         $config = new Config;
-        if($config -> toolKitHost == ""){return "";}
+        if($config -> toolKitHost == ""){
+            return "";
+        }
         $URL = ($config -> toolKitHost)."/wordcloud?roomid={$roomId}&from={$startTime}&to={$endTime}";
+        return CQ::image($URL);
+    }
+    
+    /* 
+     * 获取弹幕峰值图
+     * Arg: $roomId(int) -> Up主直播间号  $startTime(int) -> 开始时间 $endTime(int) -> 结束时间
+     * Author: FishZe
+     * Date: 2022/03/29 18:40
+     */
+    public function getDanmuPic($roomId, $startTime, $endTime){
+        $config = new Config;
+        if($config -> toolKitHost == ""){
+            return "";
+        }
+        $URL = ($config -> toolKitHost)."/getdanmupic?roomid={$roomId}&from={$startTime}&to={$endTime}";
         return CQ::image($URL);
     }
     
@@ -36,7 +53,9 @@ class Api{
      */
     public function getDynamicPic($id){
         $config = new Config;
-        if($config -> toolKitHost == ""){return "";}
+        if($config -> toolKitHost == ""){
+            return "";
+        }
         $URL = ($config -> toolKitHost)."/bilicard?id=".$id;
         return CQ::image($URL);
     }
@@ -49,12 +68,12 @@ class Api{
      */
     public function startDanmu($roomId) {
         $config = new Config;
-        echo $config -> danmuHost;
-        if($config -> danmuHost == ""){return "";}
+        if($config -> danmuHost == ""){
+            return "";
+        }
         $URL = ($config -> danmuHost)."/create?roomid=".strval($roomId);
         $r = ZMRequest::get($URL, ["User-Agent" => $this -> USER_AGENT]);
         $res = json_decode($r, true);
-        echo $res;
         return $res;
     }
     
@@ -66,7 +85,9 @@ class Api{
      */
     public function delDanmu($roomId) {
         $config = new Config;
-        if($config -> danmuHost == ""){return false;}
+        if($config -> danmuHost == ""){
+            return false;
+        }
         $URL = ($config -> danmuHost)."/del?roomid=".strval($roomId);
         $r = ZMRequest::get($URL, ["User-Agent" => $this -> USER_AGENT]);
         $res = json_decode($r, true);
@@ -85,7 +106,9 @@ class Api{
         $URL = "https://api.bilibili.com/x/space/acc/info?mid=".$mid;
         $r = ZMRequest::get($URL, ["User-Agent" => $this -> USER_AGENT]);
         $res = json_decode($r, true);
-        if($res['code'] != 0){ return NULL; }
+        if($res == NULL || $res['code'] != 0){
+            return NULL; 
+        }
         return $res['data'];
     }
     
@@ -100,7 +123,9 @@ class Api{
         $data = json_encode(["uids" => $mids]);
         $r = ZMRequest::post($URL, ["User-Agent" => $this -> USER_AGENT], $data);
         $res = json_decode($r, true);
-        if($res == NULL || $res['code'] != 0){ return NULL; }
+        if($res == NULL || $res['code'] != 0){ 
+            return NULL; 
+        }
         return $res['data'];
     }
     
@@ -116,7 +141,9 @@ class Api{
         $URL = !$needTop ? $URL."&need_top=0" : $URL;
         $r = ZMRequest::get($URL, ["User-Agent" => $this -> USER_AGENT]);
         $res = json_decode($r, true);
-        if($res['code'] != 0){ return NULL; }
+        if($res == NULL || $res['code'] != 0){ 
+            return NULL; 
+        }
         return $res['data']['cards'];
     }
     
@@ -126,7 +153,8 @@ class Api{
      * Date: 2022/03/16 00:13
      */
     public function getDynamicLatest($mid){
-        return $this -> getDynamic($mid, false)[0];
+        $r = $this -> getDynamic($mid, false)[0];
+        return $r == NULL ? NULL : $r;
     }
 
     /* 搜索所有信息
@@ -138,7 +166,9 @@ class Api{
         $URL = "https://api.bilibili.com/x/web-interface/search/all/v2?keyword=".$keyword;
         $r = ZMRequest::get($URL, ["User-Agent" => $this -> USER_AGENT]);
         $res = json_decode($r, true);
-        if($res['code'] != 0){ return NULL; }
+        if($res == NULL || $res['code'] != 0){ 
+            return NULL; 
+        }
         return $res['data'];
     }
     
@@ -151,7 +181,9 @@ class Api{
         $URL = "https://api.bilibili.com/x/web-interface/search/type?search_type={$type}&keyword={$keyword}&page={$page}";
         $r = ZMRequest::get($URL, ["User-Agent" => $this -> USER_AGENT]);
         $res = json_decode($r, true);
-        if($res['code'] != 0){ return NULL; }
+        if($res == NULL || $res['code'] != 0){ 
+            return NULL; 
+        }
         return $res['data'];
     }
     
@@ -179,7 +211,11 @@ class Api{
      */
     public function findUserAccurate($name){
         for($i = 1, $rawData = $this -> searchByType("bili_user", $name); $i <= $rawData !=NULL ? $rawData['numPages'] : 0; $i ++, zm_sleep(0.1)){
-            foreach ($rawData['result'] as $u){ if($u['uname'] == $name){ return $u; } }
+            foreach ($rawData['result'] as $u){ 
+                if($u['uname'] == $name){ 
+                    return $u; 
+                } 
+            }
             $nowData = $this -> searchByType("bili_user", $name, $i + 1);
         }
         return NULL;

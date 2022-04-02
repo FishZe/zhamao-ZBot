@@ -1,10 +1,10 @@
 {
 	"name": "ZBot-BiliPush",
 	"description": "BiliBili的推送模块!",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"light-cache-store": [
 		"SUPER_QQ"
 	],
 	"global-config-override": "请连接数据库，并下载toolKit(python)的辅助工具",
-	"allow-hotload": true
+	"allow-hotload": false
 }

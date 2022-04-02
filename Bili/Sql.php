@@ -56,7 +56,9 @@ class Sql{
     public function dropTable($name){
         $wrapper = \ZM\MySQL\MySQLManager::getWrapper();
         $tables = $this -> getAllTables();
-        if(!in_array($name, $tables)){ return false; }
+        if(!in_array($name, $tables)){ 
+            return false; 
+        }
         $r = $wrapper -> executeStatement('DROP TABLE '.$name);
         return $r;
     }
@@ -80,7 +82,9 @@ class Sql{
     public function getUp($mid){
         $wrapper = \ZM\MySQL\MySQLManager::getWrapper();
         $up = $wrapper -> fetchAssociative('SELECT * FROM bili_ups where mid = ?', array($mid));
-        if($up == false){return false;}
+        if($up == false){
+            return false;
+        }
         return $up;
     }
     
@@ -103,7 +107,9 @@ class Sql{
     public function getUpByName($name) {
         $wrapper = \ZM\MySQL\MySQLManager::getWrapper();
         $up = $wrapper -> fetchAssociative('SELECT * FROM bili_ups where name = ?', array($name));
-        if($up == false){return false;}
+        if($up == false){
+            return false;
+        }
         return $up;
     }
     
@@ -159,7 +165,9 @@ class Sql{
         if(!$force){return true;}
         $wrapper -> delete('bili_push', array('mid' => $mid));
         $wrapper -> delete('bili_live_history', array('mid' => $mid));
-        if($nowUp['danmu_record']){ $this -> dropDanmuTable($nowUp['room_id'], $mid); }
+        if($nowUp['danmu_record']){ 
+            $this -> dropDanmuTable($nowUp['room_id'], $mid); 
+        }
         return true;
     }
     
@@ -185,7 +193,11 @@ class Sql{
         $rawList = $this -> getUpPush($mid);
         if($type == "all"){return $rawList;}
         $list = array();
-        foreach ($rawList as $qq){ if($qq['qq_type'] == $type){ array_push($list, $qq); }}
+        foreach ($rawList as $qq){ 
+            if($qq['qq_type'] == $type){ 
+                array_push($list, $qq); 
+                }
+        }
         return $list;
     }
     
@@ -257,7 +269,9 @@ class Sql{
     public function getUpLiveHistoryTop($mid) {
         $wrapper = \ZM\MySQL\MySQLManager::getWrapper();
         $history = $wrapper -> fetchAllAssociative('SELECT * from bili_live_history where id = (SELECT MAX(id) FROM (SELECT * from bili_live_history where mid = ?) tmp_table)', array($mid));
-        if($history == NULL){return NULL;}
+        if($history == NULL){
+            return NULL;
+        }
         return $history[0];
     }
     
@@ -269,7 +283,9 @@ class Sql{
      */
     public function getLiveStopInterval($mid) {
         $lastLive = $this -> getUpLiveHistoryTop($mid);
-        if($lastLive == NULL) {return -1;}
+        if($lastLive == NULL) {
+            return -1;
+        }
         return time() - $lastLive['stop_timestamp'];
     }
     
@@ -281,7 +297,9 @@ class Sql{
      */
     public function getLiveStartInterval($mid) {
         $lastLive = $this -> getUpLiveHistoryTop($mid);
-        if($lastLive == NULL) {return -1;}
+        if($lastLive == NULL) {
+            return -1;
+        }
         return time() - $lastLive['start_timestamp'];
     }
     
@@ -317,7 +335,9 @@ class Sql{
      * Data: 2022/03/14 23:53
      */
     public function createDanmuTable($roomId = NULL, $mid = NULL) {
-        if($roomId == NULL && $mid == NULL){return false;}
+        if($roomId == NULL && $mid == NULL){
+            return false;
+        }
         if($roomId == NULL){
             $up = $this -> getUp($mid);
             $roomId = $up['room_id'];
@@ -338,7 +358,9 @@ class Sql{
      * Data: 2022/03/25 02:30
      */
     public function dropDanmuTable($roomId = NULL, $mid = NULL) {
-        if($roomId == NULL && $mid == NULL){return false;}
+        if($roomId == NULL && $mid == NULL){
+            return false;
+        }
         if($roomId == NULL){
             $up = $this -> getUp($mid);
             $roomId = $up['room_id'];

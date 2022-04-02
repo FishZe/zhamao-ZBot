@@ -1,4 +1,5 @@
 import time
+import json
 import base64
 import pymysql
 
@@ -74,6 +75,7 @@ def pushDB():
     cur = db.cursor(pymysql.cursors.DictCursor)
     for i in nowdanmus:
         try:
+            print(i['danmu'].content)
             sql = "INSERT INTO `%s` (`mid`, `time`, `name`, `content`) VALUES (%d, %d, '%s', '%s')" % ('bili_danmu_' + str(i['roomid']),  i['danmu'].sender.id, i['time'], str(base64.b64encode(i['danmu'].sender.name.encode('utf-8')))[2:-1],  str(base64.b64encode(i['danmu'].content.encode('utf-8')))[2:-1])
             cur.execute(sql)
         except :

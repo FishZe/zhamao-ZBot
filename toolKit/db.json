@@ -1,9 +1,9 @@
 {
-    "host": "", 
-    "port": , 
-    "user": "", 
-    "password": "", 
-    "db": "", 
+    "host": "mysql", 
+    "port": 3306, 
+    "user": "root", 
+    "password": "zhamao_zbot", 
+    "db": "zbot", 
     "use_unicode": true, 
     "charset": "utf8"
 }
