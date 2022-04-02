@@ -9,8 +9,8 @@ namespace Module\Bili;
  */
 class Config{
     
-    public $danmuHost = "http://zbot_tookit:20002";
-    public $toolKitHost = "http://zbot_danmu:20003";
+    public $danmuHost = "http://127.0.0.1:20002";
+    public $toolKitHost = "http://127.0.0.1:20003";
     
     # 用于计算状态压缩
     public $dynamicType = array('转发' => 1, '图片' => 2, '文字' => 3, '视频' => 4, '小视频' => 5,

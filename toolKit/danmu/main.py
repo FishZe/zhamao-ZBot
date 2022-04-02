@@ -22,14 +22,17 @@ def testConnect():
     except:
         with open('../db.json') as f:
             data = json.load(f)
-        db = pymysql.connect(
-            host = data['host'],
-            port = data['port'],
-            user = data['user'],
-            password = data['password'],
-            db = data['db'],
-            use_unicode = data['use_unicode'],
-            charset = data['charset'])
+        try:
+            db = pymysql.connect(
+                host = data['host'],
+                port = data['port'],
+                user = data['user'],
+                password = data['password'],
+                db = data['db'],
+                use_unicode = data['use_unicode'],
+                charset = data['charset'])
+        except:
+            print("unable to connect to the mysql")
     return db
 
 # 定义弹幕事件handler

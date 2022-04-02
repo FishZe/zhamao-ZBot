@@ -155,7 +155,7 @@ class Cmd{
         $args = explode(' ', $msg);
         if(count($args) == 1) { 
             return "lack of args!"; }
-        if($args[1] == '--uid' || $args[1] == '--id'){
+        if($args[1] == '--uid' || $args[1] == '-m'){
             if(count($args) < 3) { 
                 return "lack of args!"; 
             }

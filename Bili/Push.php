@@ -65,6 +65,10 @@ class Push{
      * 推送直播提醒
      */
     public function liveNotice() {
+        $open = LightCache::get("sqlOpen");
+        if(!$open){
+            return;
+        }
         $sql = new Sql;
         $api = new Api;
         $upMids = $sql -> getAllUpsMids();
@@ -89,6 +93,7 @@ class Push{
                     $api -> startDanmu($info['room_id']); 
                 }
                 $msg = "{$info['name']}直播了！\n 【{$state['title']}】\n".CQ::image($state['cover_from_user'])."\n传送门 →https://live.bilibili.com/".$state['room_id']."\n"."距离上次直播: ".$this -> getFormatTime($liveInterval)."\n<==================> \n ZBot V0.0.1";
+                echo $msg;
                 $this -> pushMsg($up, $msg, -1);
                 
             } else if($state['live_status'] != 1 && $info['live_status']){
