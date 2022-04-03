@@ -43,7 +43,7 @@ def create_bliver(roomid):
         global danmus
         danmus.append({"danmu": danmu, 'roomid': roomid, 'time': time.time()})
 
-    blive = BLiver(roomid, log_level="DEBUG")
+    blive = BLiver(roomid)
     blive.register_handler(Events.DANMU_MSG, listen)
     return blive
 
@@ -73,13 +73,14 @@ async def show():
 def pushDB():
     global danmus
     global db
+    if db == None:
+        return
     nowdanmus = list(danmus)
     danmus = []
     testConnect()
     cur = db.cursor(pymysql.cursors.DictCursor)
     for i in nowdanmus:
         try:
-            print(i['danmu'].content)
             sql = "INSERT INTO `%s` (`mid`, `time`, `name`, `content`) VALUES (%d, %d, '%s', '%s')" % ('bili_danmu_' + str(i['roomid']),  i['danmu'].sender.id, i['time'], str(base64.b64encode(i['danmu'].sender.name.encode('utf-8')))[2:-1],  str(base64.b64encode(i['danmu'].content.encode('utf-8')))[2:-1])
             cur.execute(sql)
         except :
