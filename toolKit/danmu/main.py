@@ -17,6 +17,7 @@ danmus = []
 db = None
 
 def testConnect():
+    global db
     try:
         db.ping()
     except:
@@ -33,7 +34,6 @@ def testConnect():
                 charset = data['charset'])
         except:
             print("unable to connect to the mysql")
-    return db
 
 # 定义弹幕事件handler
 def create_bliver(roomid):
@@ -43,7 +43,7 @@ def create_bliver(roomid):
         global danmus
         danmus.append({"danmu": danmu, 'roomid': roomid, 'time': time.time()})
 
-    blive = BLiver(roomid)
+    blive = BLiver(roomid, log_level="DEBUG")
     blive.register_handler(Events.DANMU_MSG, listen)
     return blive
 
@@ -72,9 +72,10 @@ async def show():
     
 def pushDB():
     global danmus
+    global db
     nowdanmus = list(danmus)
     danmus = []
-    db = testConnect()
+    testConnect()
     cur = db.cursor(pymysql.cursors.DictCursor)
     for i in nowdanmus:
         try:

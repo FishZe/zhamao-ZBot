@@ -24,9 +24,6 @@ class Sys{
     public function checkSql(){
         LightCache::set("nowDynamicCheck", 0);
         LightCache::set("BILI_BUILD_TIME", date("Y-m-d H:i:s"));
-        LightCache::set("sqlOpen", 0);
-        
-        zm_sleep(5); # 等待一下数据库连接
         
         $config = ZMConfig::get("global", "mysql_config");
         if($config['host'] == ""){
@@ -45,7 +42,6 @@ class Sys{
                 Console::info(sprintf("刚刚建立了名为 %s 的数据库!", $t));
             }
         }
-        LightCache::set("sqlOpen", 1);
     }
     
     /**

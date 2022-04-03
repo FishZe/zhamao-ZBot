@@ -14,6 +14,13 @@ use ZM\Annotation\Swoole\OnTick;
  * @since 2.0
  */
 class Push{
+    
+    /**
+     * @CQCommand("test")
+     */
+     public function test1(){
+         return CQ::image("http://zbot_toolkit:20003/bilicard?id=644634235699724296");
+     }
 
     /**
      * 格式化时间
@@ -65,10 +72,6 @@ class Push{
      * 推送直播提醒
      */
     public function liveNotice() {
-        $open = LightCache::get("sqlOpen");
-        if(!$open){
-            return;
-        }
         $sql = new Sql;
         $api = new Api;
         $upMids = $sql -> getAllUpsMids();
