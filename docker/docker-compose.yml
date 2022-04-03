@@ -1,0 +1,49 @@
+version: '3'
+services:
+  mysql:
+    restart: always
+    image: mysql:latest
+    container_name: zbot_mysql
+    environment:
+      - "MYSQL_ROOT_PASSWORD=zhamao_zbot"
+      - "MYSQL_DATABASE=zbot"
+      - "TZ=Asia/Shanghai"
+    ports:
+      - 3306:3306
+    hostname: mysql
+  zhamao:
+    build: ./zhamao
+    restart: always
+    ports:
+     - 20001:20001
+    hostname: zhamao
+    depends_on:
+     - mysql
+     - zbot_toolkit
+     - zbot_danmu
+  zbot_toolkit:
+    build: ./imgHandle
+    restart: always
+    ports:
+     - 20003:20003
+    hostname: zbot_toolkit
+    depends_on:
+     - mysql
+  zbot_danmu:
+    build: ./danmu
+    restart: always
+    ports:
+     - 20002:20002
+    hostname: zbot_danmu
+    depends_on:
+     - mysql
+  go-cqhttp:
+    build: ./go-cqhttp
+    restart: always
+    hostname: go_cqhttp
+    depends_on:
+     - zhamao
+    environment:
+     - "QQ_ID="
+     - "QQ_PASSWD="
+     - "PROTOCOL=3"
