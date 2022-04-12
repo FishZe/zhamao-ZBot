@@ -2,6 +2,8 @@ import time
 import json
 import base64
 import pymysql
+import queue
+import threading
 
 from fastapi import FastAPI
 from blive import BLiver,Events
@@ -12,7 +14,8 @@ app = FastAPI()
 
 BLIVER_POOL = {}
 
-danmus = []
+queueLock = threading.Lock()
+danmus = queue.Queue()
 
 db = None
 
@@ -41,7 +44,11 @@ def create_bliver(roomid):
     async def listen(ctx):
         danmu = DanMuMsg(ctx.body)
         global danmus
-        danmus.append({"danmu": danmu, 'roomid': roomid, 'time': time.time()})
+        global queueLock
+        print("\033[01;32mGet       \033[0m" + f"收到{roomid}的弹幕: {danmu.content}")
+        queueLock.acquire()
+        danmus.put({"danmu": danmu, 'roomid': roomid, 'time': time.time()})
+        queueLock.release()
 
     blive = BLiver(roomid)
     blive.register_handler(Events.DANMU_MSG, listen)
@@ -73,20 +80,26 @@ async def show():
 def pushDB():
     global danmus
     global db
-    if db == None:
+    global queueLock
+    if danmus.empty():
         return
-    nowdanmus = list(danmus)
-    danmus = []
+    print("\033[01;34mDB Insert Task Begin\033[0m")
     testConnect()
     cur = db.cursor(pymysql.cursors.DictCursor)
-    for i in nowdanmus:
+    queueLock.acquire()
+    while not danmus.empty():
+        i = danmus.get()
         try:
+            print("\033[01;34mInsert    \033[0m" + f"插入成功: {i['danmu'].content}")
             sql = "INSERT INTO `%s` (`mid`, `time`, `name`, `content`) VALUES (%d, %d, '%s', '%s')" % ('bili_danmu_' + str(i['roomid']),  i['danmu'].sender.id, i['time'], str(base64.b64encode(i['danmu'].sender.name.encode('utf-8')))[2:-1],  str(base64.b64encode(i['danmu'].content.encode('utf-8')))[2:-1])
             cur.execute(sql)
-        except :
-            print("error occured!")
+        except Exception as e:
+            print(e)
+    queueLock.release()
+    print("\033[01;34mDB Insert Task End\033[0m")
     db.commit()
+    
 
 scheduler = AsyncIOScheduler({'apscheduler.timezone': 'UTC'})
-scheduler.add_job(pushDB, 'interval', seconds = 5)
+scheduler.add_job(pushDB, 'interval', seconds = 10)
 scheduler.start()
