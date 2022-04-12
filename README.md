@@ -66,3 +66,9 @@ Windows 下的安装仅供体验，勿在生产环境使用。如有必要，请
 2. $cancelPush --uid 141543557
 ```
 
+# 鸣谢
+[弹幕姬 bilive](https://github.com/yulinfeng000/blive)
+
+[炸毛机器人框架](https://github.com/zhamao-robot/zhamao-framework)
+
+[QQ bot客户端](https://github.com/Mrs4s/go-cqhttp)
